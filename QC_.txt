@@ -1,6 +1,6 @@
-#######################################################
-###### CONTROLE DE QUALIDADE E IMPUTACAO - INPD  ######
-#######################################################
+###########################################
+###### CONTROLE DE QUALIDADE - INPD  ######
+###########################################
 
 ## CONTROLE DE QUALIDADE ##
 # > Confirmar o sexo: --check-sex
@@ -13,96 +13,86 @@
 ----------------------------------------------------------------------------------
 
 ## PASSOS OPCIONAIS ANTES DE COMEÇAR O QC - CASO O FENOTIPO SEJA IMPORTANTE
-## - Adicionar fenotipo (para datasets em que a ultima coluna do '.fam' estiver -9, ou missing)
-plink --bfile [arquivo_bruto] --pheno phenotype_ptsd.txt --pheno-merge --make-bed --out ptsd_phenotype
+## Adicionar fenotipo (para datasets em que a ultima coluna do '.fam' estiver -9, ou missing)
+## 'phenotype_file.txt' é um arquivo texto com o FID, ID da amostra e fenótipo em 3 colunas respectivamente 
+plink --bfile [arquivo_bruto] --pheno phenotype_file.txt --pheno-merge --make-bed --out [identificacao]_phenotype
 
-## - Arrumar Family ID (caso o FID no .fam esteja diferente p/ cada individuo. o certo e ser 0 para todos) 
-awk '{print $1, $2, $3, $2}' ptsd_phenotype.fam > upd_fam.txt
+## Arrumar Family ID (caso o FID no .fam esteja diferente p/ cada individuo. o certo e ser 0 para todos) 
+awk '{print $1, $2, $3, $2}' [arquivo_bruto].fam > upd_fam.txt
 
-## - Conferir se os passos anteriores deram certo
-plink --bfile ptsd_phenotype.fam --update-ids upd_fam.txt --make-bed --out ptsd_phenotype_fid
+## Conferir se os passos anteriores deram certo
+plink --bfile [arquivo_phenotype] --update-ids upd_fam.txt --make-bed --out [arquivo_phenotype_fid]
 
 ------------------------------------------------------------------------------------
 
 ## PASSO 1 - Remover indels e SNPs com mais de dois alelos
 ### Caso não funcione, substituir just-acgt por no-DI, mas isso e um sinal de que a versao do plink esta desatualizada
-plink --bfile [arquivo_pheno] --snps-only just-acgt --make-bed --out [arquivo_semIndels]
+plink --bfile [arquivo_phenotype_fid] --snps-only just-acgt --make-bed --out [arquivo_semIndels]
 
+## PASSO 2 - Filtros
+## MAF (frequencia do menor alelo) 
+## GENO (taxa de SNPs n genotipados)
+## HWE (eq. Hardy-Weinberg) 
+## MIND (amostras com baixa taxa de genotipagem)
+plink --bfile [arquivo_semIndels] --maf 0.01 --geno 0.05 --hwe 0.001 --mind 0.01 --make-bed --out [arquivo_QC]
+plink --bfile [arquivo_QC] --mind 0.01 --make-bed --out [arquivo_QC_mind]
 
-## PASSO 2 - Observar os parametros do QC
-## PASSO 2.1 - Checar frequencia do alelo raro
-plink --bfile [arquivo_semIndels] --freq --out [info_freq]
+## PASSO 3 - Sex-check
+## Separar a parte homóloga XY (baseado no hg 19 que é o pedido pelo Sanger Imputation)
+plink --bfile [arquivo_QC] --split-x b37 --make-bed --out [arquivo_split]
 
-## PASSO 2.2 -  Checar indivíduos/SNPs com falhas (arquivo .imiss para indivíduos e .lmiss para SNPs)
-plink --bfile [arquivo_semIndels] --missing --out [info_miss] 
-
-## PASSO 2.3 -  Checar Eq. de HW
-plink --bfile [arquivo_semIndels] --hardy --out [info_HW]
-
-## PASSO 2.4 -  Checar indivíduos heterozigotos
-plink --bfile [arquivo_semIndels] --het --out [info_het]
-
-
-## PASSO 3 - Excluir indivíduos outliers heterozigotos (medida de heterozigosidade >3 desvios padrao) e individuos que nao estao genotipados 
-##           >3% dos SNPS (Este passo deve ser feito no R)
-
-### PASSO 3.1 - Seguir os passos no R, script: passo3_QC_INPD.R
-
-### PASSO 3.2 - Excluir de fato os individuos (linha de comando): 
-plink --bfile [arquivo_semIndels] --remove [arquivo_ail-imisshet-qc.txt] --make-bed --out [arquivo_semhet]
-
-
-## PASSO 4 - Filtros
-##           Filtrar MAF (frequencia do menor alelo), GENO (taxa de SNPs n genotipados), HWE (eq. Hardy-Weinberg), MIND (amostras com baixa ##                        taxa de genotipagem)
-plink --bfile [arquivo_semhet] --maf 0.01 --geno 0.05 --hwe 0.001 --mind 0.01 --make-bed --out [arquivo_QC]
-
-
-## PASSO 5 - Sex-check
-##           Separar a parte homologa XY (baseado no hg 19 que e o pedido pelo Sanger Imputation)
+### OBS: se o plink não deixar porque já existe uma região ‘XY’, fazer
 plink --bfile [arquivo_QC] --merge-x --make-bed --out [arquivo_merge]
-
 plink --bfile [arquivo_merge] --split-x b37 --make-bed --out [arquivo_split]
 
 ## Sexcheck de fato
-plink --bfile [arquivo_split] --check-sex --out [arquivo_sexcheck]
+plink --bfile ptsd_genotype_split --check-sex --out ptsd_sexcheck
 
 ## Ver o no. de PROBLEM no arquivo .sexcheck
-## Abrir os outputs no R e plotar grafico F statistic por sex label (dotchart(INPD_sexcheck$F)). Se quase todos os pontos masculinos estiverem agrupados a direita e os femininos mais separados a esquerda, esta correta a distribuicao.
+## Abrir os outputs no R e plotar grafico F statistic por sex label (dotchart(INPD_sexcheck$F)). 
+## Se quase todos os pontos masculinos estiverem agrupados a direita e os femininos mais separados a esquerda, esta correta a distribuicao.
 
+## PASSO 4 - Remover cromossomos indesejados (0: unknown, 23: X, 24: Y, 25: XY homologa, 26: mitocondrial)
+plink --bfile [arquivo_QC_mind] --not-chr 0,23-26 --make-bed --keep-allele-order --out [arquivo_QC_semXY]
 
-## PASSO 6 - Remover cromossomos indesejados (0: unknown, 23: X, 24: Y, 25: XY homologa, 26: mitocondrial)
-plink --bfile [arquivo_QC] --not-chr 0,23-26 --make-bed --keep-allele-order --out [arquivo_QC_semXY]
+## PASSO 5 - Excluir indivíduos outliers heterozigotos (heterozigosidade >3 desvios padrão) e indivíduos que não estão genotipados >3% dos SNPS
+plink --bfile [arquivo_QC_semXY] --missing --out indiv_missing
+plink --bfile [arquivo_QC_semXY] --het --out hetero
 
+# NO R
+# Importar dados
+imiss <- read.table('indiv_missing.imiss',h=T)
+het <- read.table('hetero.het',h=T)
+het$P_HET <- (het$N.NM. - het$O.HOM.) / het$N.NM.
+upper_3sd <- mean(het$P_HET) + 3*sd(het$P_HET)
+lower_3sd <- mean(het$P_HET) - 3*sd(het$P_HET)
+# Criar lista de indivíduos para remover
+imiss_rem <- subset(imiss,imiss$F_MISS > 0.03)[,1:2]
+het_rem <- subset(het,het$P_HET > upper_3sd | het$P_HET < lower_3sd)[,1:2]
+indiv_rem <- rbind(imiss_rem,het_rem)
+write.table(indiv_rem,'fail-imisshet-qc.txt',col=F,row=F,quo=F,sep='\t')
 
-## PASSO 7 - IBD (gera o arquivo ibd_calculation.genome, que contem o calculo IBD)
-plink --bfile [arquivo_QC_semXY] --genome --min 0.125 --out ibd_calculation
+plink --bfile [arquivo_QC_semXY] --remove fail-imisshet-qc.txt --make-bed --out [arquivo_QC_semhet]
+
+## PASSO 6 - IBD (gera o arquivo ibd_calculation.genome, que contem o calculo IBD)
+plink --bfile [arquivo_QC_semhet] --genome --min 0.125 --out ibd_calculation
 
 ## Olhar o arquivo ibd_calculation.genome e ver qual coluna tem a maior qtd. de individuos repetidos, separar essa para excluir: selecionar colunas FID1 e IID1 OU FID2 e IID2
-
-awk '{ print $3,$4 }' [arquivo_ibd_calculation.genome] > individuosrelacionados.txt 
+awk '{ print $1,$2 }' [arquivo_ibd_calculation.genome] > individuosrelacionados.txt 
 ## OU 
-awk '{ print $1,$2 }' [arquivo_ibd_calculation.genome] > individuosrelacionados.txt
+awk '{ print $3,$4 }' [arquivo_ibd_calculation.genome] > individuosrelacionados.txt
 
 ## Excluir os individuos com compartilhamento genetico (OBS.: Arquivo final do QC: INPD_QC_idb)
-plink --bfile [arquivo_QC_semXY] --remove individuosrelacionados.txt --make-bed --out [arquivo_QC_ibd]
+plink --bfile [arquivo_QC_semhet] --remove individuosrelacionados.txt --make-bed --out [arquivo_QC_ibd]
 
---------
-
-## PASSOS OPCIONAIS APOS O QC ##
-
-## PASSO 8 - PCA
+## PASSO 7 - PCA (importante para o PRS)
 plink --bfile [arquivo_QC_ibd] --pca var-wts --out [arquivo_QC_pca]
 
 ## Caso queira plotar graficamente o PCA (este passo deve ser feito no RStudio)
-dados_pca <-  read.table( "ptsd_QC_pca.eigenvec" )
+dados_pca <-  read.table( "[arquivo_QC_pca.eigenvec]" )
 colnames(dados_pca)[3:7] = c( "PC1","PC2","PC3","PC4","PC5" )
 plot( dados_pca[,3], dados_pca[,4], xlab = "PC1", ylab = "PC2" )
 pairs(dados_pca[, 3:7])
 
 library(ggplot2)
 ggplot(data=dados_pca, aes(x=dados_pca$PC1, y=dados_pca$PC2)) + geom_point(shape=19, alpha=0.4, size=3)
-
-
-## PASSO 9 - Plotar histogramas dos valores anteriores 
-##           > Estes devem ser feitos no R Studio
-##           > Script: plotagem_QC
