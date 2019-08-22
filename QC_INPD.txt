@@ -1,0 +1,108 @@
+#######################################################
+﻿###### CONTROLE DE QUALIDADE E IMPUTACAO - INPD  ######
+#######################################################
+
+## CONTROLE DE QUALIDADE ##
+# > Confirmar o sexo: --check-sex
+# > Eliminar amostras com baixa taxa de genotipagem: --mind 0.01
+# > Eliminar amostras duplicadas ou com alto compartilhamento genetico – 12%: 
+# > Eliminar SNPs com baixa taxa de genotipagem: --geno 0.05 (OK)
+# > Eliminar SNPs com uma frequencia do alelo raro menor que 1% na amostra e variantes que nao sao SNPs (como as indels): --maf 0.01 (OK)
+# > Eliminacao de SNPs que não estejam em equilibrio de Hardy-Weinberg (p > 0,00001): --hwe 0.001 (OK)
+
+----------------------------------------------------------------------------------
+
+## PASSOS OPCIONAIS ANTES DE COMEÇAR O QC - CASO O FENOTIPO SEJA IMPORTANTE (NO CASO DO INPD NAO E) ##
+## - Adicionar fenotipo (para datasets em que a ultima coluna do '.fam' estiver -9, ou missing)
+plink --bfile INPD_semQC --pheno phenotype_ptsd.txt --pheno-merge --make-bed --out ptsd_phenotype
+
+## - Arrumar Family ID (caso o FID no .fam esteja diferente p/ cada individuo. o certo e ser 0 para todos) 
+awk '{print $1, $2, $3, $2}' ptsd_phenotype.fam > upd_fam.txt
+
+## - Conferir se os passos anteriores deram certo
+plink --bfile ptsd_phenotype.fam --update-ids upd_fam.txt --make-bed --out ptsd_phenotype_fid
+
+------------------------------------------------------------------------------------
+
+## PASSO 1 - Remover indels e SNPs com mais de dois alelos
+### Caso não funcione, substituir just-acgt por no-DI, mas isso e um sinal de que a versao do plink esta desatualizada
+plink --bfile C:/Users/gabio/Desktop/Gabe_/project/database_INPD/files_raw/INPD_semQC --snps-only just-acgt --make-bed --out C:/Users/gabio/Desktop/Gabe_/project/database_INPD/results_QC/INPD_semQC_semindels
+
+
+## PASSO 2 - Observar os parametros do QC
+## PASSO 2.1 - Checar frequencia do alelo raro
+plink --bfile C:/Users/gabio/Desktop/Gabe_/project/database_INPD/results_QC/INPD_semQC_semindels --freq --out C:/Users/gabio/Desktop/Gabe_/project/database_INPD/results_QC/INPD_
+
+## PASSO 2.2 -  Checar indivíduos/SNPs com falhas (arquivo .imiss para indivíduos e .lmiss para SNPs)
+plink --bfile C:/Users/gabio/Desktop/Gabe_/project/database_INPD/results_QC/INPD_semQC_semindels --missing --out C:/Users/gabio/Desktop/Gabe_/project/database_INPD/results_QC/INPD_ 
+
+## PASSO 2.3 -  Checar Eq. de HW
+plink --bfile C:/Users/gabio/Desktop/Gabe_/project/database_INPD/results_QC/INPD_semQC_semindels --hardy --out C:/Users/gabio/Desktop/Gabe_/project/database_INPD/results_QC/INPD_
+
+## PASSO 2.4 -  Checar indivíduos heterozigotos
+plink --bfile C:/Users/gabio/Desktop/Gabe_/project/database_INPD/results_QC/INPD_semQC_semindels --het --out C:/Users/gabio/Desktop/Gabe_/project/database_INPD/results_QC/INPD_
+
+
+## PASSO 3 - Excluir indivíduos outliers heterozigotos (medida de heterozigosidade >3 desvios padrao) e individuos que nao estao genotipados 
+##           >3% dos SNPS (Este passo deve ser feito no R)
+
+### PASSO 3.1 - Seguir os passos no R, script: passo3_QC_INPD.R
+
+### PASSO 3.2 - Excluir de fato os individuos (linha de comando): 
+plink --bfile C:/Users/gabio/Desktop/Gabe_/project/database_INPD/results_QC/INPD_semQC_semindels --remove C:/Users/gabio/Desktop/Gabe_/project/database_INPD/results_QC/fail-imisshet-qc.txt --make-bed --out C:/Users/gabio/Desktop/Gabe_/project/database_INPD/results_QC/INPD_semhet
+
+
+## PASSO 4 - Filtros
+##           Filtrar MAF (frequencia do menor alelo), GENO (taxa de SNPs n genotipados), HWE (eq. Hardy-Weinberg), MIND (amostras com baixa ##                        taxa de genotipagem)
+plink --bfile C:/Users/gabio/Desktop/Gabe_/project/database_INPD/results_QC/INPD_semhet --maf 0.01 --geno 0.05 --hwe 0.001 --mind 0.01 --make-bed --out C:/Users/gabio/Desktop/Gabe_/project/database_INPD/results_QC/INPD_genotype_QC
+
+
+## PASSO 5 - Sex-check
+##           Separar a parte homologa XY (baseado no hg 19 que e o pedido pelo Sanger Imputation)
+plink --bfile C:/Users/gabio/Desktop/Gabe_/project/database_INPD/results_QC/INPD_genotype_QC --merge-x --make-bed --out C:/Users/gabio/Desktop/Gabe_/project/database_INPD/results_QC/INPD_genotype_merge
+
+plink --bfile C:/Users/gabio/Desktop/Gabe_/project/database_INPD/results_QC/INPD_genotype_merge --split-x b37 --make-bed --out C:/Users/gabio/Desktop/Gabe_/project/database_INPD/results_QC/INPD_genotype_split
+
+## Sexcheck de fato
+plink --bfile C:/Users/gabio/Desktop/Gabe_/project/database_INPD/results_QC/INPD_genotype_split --check-sex --out C:/Users/gabio/Desktop/Gabe_/project/database_INPD/results_QC/INPD_sexcheck
+
+## Ver o no. de PROBLEM no arquivo .sexcheck
+## Abrir os outputs no R e plotar grafico F statistic por sex label (dotchart(INPD_sexcheck$F)). Se quase todos os pontos masculinos estiverem agrupados a direita e os femininos mais separados a esquerda, esta correta a distribuicao.
+
+
+## PASSO 6 - Remover cromossomos indesejados (0: unknown, 23: X, 24: Y, 25: XY homologa, 26: mitocondrial)
+plink --bfile C:/Users/gabio/Desktop/Gabe_/project/database_INPD/results_QC/INPD_genotype_QC --not-chr 0,23-26 --make-bed --keep-allele-order --out C:/Users/gabio/Desktop/Gabe_/project/database_INPD/results_QC/INPD_genotype_QC_semXY
+
+
+## PASSO 7 - IBD (gera o arquivo ibd_calculation.genome, que contem o calculo IBD)
+plink --bfile C:/Users/gabio/Desktop/Gabe_/project/database_INPD/results_QC/INPD_genotype_QC_semXY --genome --min 0.125 --out ibd_calculation
+
+## Olhar o arquivo ibd_calculation.genome e ver qual coluna tem a maior qtd. de individuos repetidos, separar essa para excluir: selecionar colunas FID1 e IID1 OU FID2 e IID2
+
+awk '{ print $3,$4 }' C:/Users/gabio/Desktop/Gabe_/project/database_INPD/results_QC/ibd_calculation.genome > individuosrelacionados.txt 
+## OU 
+awk '{ print $1,$2 }' C:/Users/gabio/Desktop/Gabe_/project/database_INPD/results_QC/ibd_calculation.genome > individuosrelacionados.txt
+
+## Excluir os individuos com compartilhamento genetico (OBS.: Arquivo final do QC: INPD_QC_idb)
+plink --bfile C:/Users/gabio/Desktop/Gabe_/project/database_INPD/results_QC/INPD_genotype_QC_semXY --remove individuosrelacionados.txt --make-bed --out C:/Users/gabio/Desktop/Gabe_/project/database_INPD/results_QC/INPD_QC_ibd
+
+--------
+
+## PASSOS OPCIONAIS APOS O QC ##
+
+## PASSO 8 - PCA
+plink --bfile C:/Users/gabio/Desktop/Gabe_/project/database_INPD/results_QC/INPD_QC_ibd --pca var-wts --out C:/Users/gabio/Desktop/Gabe_/project/database_INPD/results_QC/INPD_QC_pca
+
+## Caso queira plotar graficamente o PCA (este passo deve ser feito no RStudio)
+dados_pca <-  read.table( "ptsd_QC_pca.eigenvec" )
+colnames(dados_pca)[3:7] = c( "PC1","PC2","PC3","PC4","PC5" )
+plot( dados_pca[,3], dados_pca[,4], xlab = "PC1", ylab = "PC2" )
+pairs(dados_pca[, 3:7])
+
+library(ggplot2)
+ggplot(data=dados_pca, aes(x=dados_pca$PC1, y=dados_pca$PC2)) + geom_point(shape=19, alpha=0.4, size=3)
+
+
+## PASSO 9 - Plotar histogramas dos valores anteriores 
+##           > Estes devem ser feitos no R Studio
+##           > Script: plotagem_QC
