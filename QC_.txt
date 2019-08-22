@@ -6,9 +6,9 @@
 # > Confirmar o sexo: --check-sex
 # > Eliminar amostras com baixa taxa de genotipagem: --mind 0.01
 # > Eliminar amostras duplicadas ou com alto compartilhamento genetico – 12%: 
-# > Eliminar SNPs com baixa taxa de genotipagem: --geno 0.05 (OK)
-# > Eliminar SNPs com uma frequencia do alelo raro menor que 1% na amostra e variantes que nao sao SNPs (como as indels): --maf 0.01 (OK)
-# > Eliminacao de SNPs que não estejam em equilibrio de Hardy-Weinberg (p > 0,00001): --hwe 0.001 (OK)
+# > Eliminar SNPs com baixa taxa de genotipagem: --geno 0.05
+# > Eliminar SNPs com uma frequencia do alelo raro menor que 1% na amostra e variantes que nao sao SNPs (como as indels): --maf 0.01
+# > Eliminacao de SNPs que não estejam em equilibrio de Hardy-Weinberg (p > 0,00001): --hwe 0.001
 
 ----------------------------------------------------------------------------------
 
