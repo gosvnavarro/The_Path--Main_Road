@@ -14,7 +14,7 @@
 
 ## PASSOS OPCIONAIS ANTES DE COMEÇAR O QC - CASO O FENOTIPO SEJA IMPORTANTE (NO CASO DO INPD NAO E) ##
 ## - Adicionar fenotipo (para datasets em que a ultima coluna do '.fam' estiver -9, ou missing)
-plink --bfile INPD_semQC --pheno phenotype_ptsd.txt --pheno-merge --make-bed --out ptsd_phenotype
+plink --bfile [arquivo_bruto] --pheno phenotype_ptsd.txt --pheno-merge --make-bed --out ptsd_phenotype
 
 ## - Arrumar Family ID (caso o FID no .fam esteja diferente p/ cada individuo. o certo e ser 0 para todos) 
 awk '{print $1, $2, $3, $2}' ptsd_phenotype.fam > upd_fam.txt
@@ -26,21 +26,21 @@ plink --bfile ptsd_phenotype.fam --update-ids upd_fam.txt --make-bed --out ptsd_
 
 ## PASSO 1 - Remover indels e SNPs com mais de dois alelos
 ### Caso não funcione, substituir just-acgt por no-DI, mas isso e um sinal de que a versao do plink esta desatualizada
-plink --bfile C:/Users/gabio/Desktop/Gabe_/project/database_INPD/files_raw/INPD_semQC --snps-only just-acgt --make-bed --out C:/Users/gabio/Desktop/Gabe_/project/database_INPD/results_QC/INPD_semQC_semindels
+plink --bfile [arquivo_pheno] --snps-only just-acgt --make-bed --out [arquivo_semIndels]
 
 
 ## PASSO 2 - Observar os parametros do QC
 ## PASSO 2.1 - Checar frequencia do alelo raro
-plink --bfile C:/Users/gabio/Desktop/Gabe_/project/database_INPD/results_QC/INPD_semQC_semindels --freq --out C:/Users/gabio/Desktop/Gabe_/project/database_INPD/results_QC/INPD_
+plink --bfile [arquivo_semIndels] --freq --out [info_freq]
 
 ## PASSO 2.2 -  Checar indivíduos/SNPs com falhas (arquivo .imiss para indivíduos e .lmiss para SNPs)
-plink --bfile C:/Users/gabio/Desktop/Gabe_/project/database_INPD/results_QC/INPD_semQC_semindels --missing --out C:/Users/gabio/Desktop/Gabe_/project/database_INPD/results_QC/INPD_ 
+plink --bfile [arquivo_semIndels] --missing --out [info_miss] 
 
 ## PASSO 2.3 -  Checar Eq. de HW
-plink --bfile C:/Users/gabio/Desktop/Gabe_/project/database_INPD/results_QC/INPD_semQC_semindels --hardy --out C:/Users/gabio/Desktop/Gabe_/project/database_INPD/results_QC/INPD_
+plink --bfile [arquivo_semIndels] --hardy --out [info_HW]
 
 ## PASSO 2.4 -  Checar indivíduos heterozigotos
-plink --bfile C:/Users/gabio/Desktop/Gabe_/project/database_INPD/results_QC/INPD_semQC_semindels --het --out C:/Users/gabio/Desktop/Gabe_/project/database_INPD/results_QC/INPD_
+plink --bfile [arquivo_semIndels] --het --out [info_het]
 
 
 ## PASSO 3 - Excluir indivíduos outliers heterozigotos (medida de heterozigosidade >3 desvios padrao) e individuos que nao estao genotipados 
@@ -49,7 +49,7 @@ plink --bfile C:/Users/gabio/Desktop/Gabe_/project/database_INPD/results_QC/INPD
 ### PASSO 3.1 - Seguir os passos no R, script: passo3_QC_INPD.R
 
 ### PASSO 3.2 - Excluir de fato os individuos (linha de comando): 
-plink --bfile C:/Users/gabio/Desktop/Gabe_/project/database_INPD/results_QC/INPD_semQC_semindels --remove C:/Users/gabio/Desktop/Gabe_/project/database_INPD/results_QC/fail-imisshet-qc.txt --make-bed --out C:/Users/gabio/Desktop/Gabe_/project/database_INPD/results_QC/INPD_semhet
+plink --bfile [arquivo_semIndels] --remove [arquivo_ail-imisshet-qc.txt] --make-bed --out [arquivo_semhet]
 
 
 ## PASSO 4 - Filtros
