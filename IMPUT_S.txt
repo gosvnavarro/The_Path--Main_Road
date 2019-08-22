@@ -7,20 +7,17 @@
 #########################
 ##### PRE IMPUTACAO #####
 #########################
-plink --bfile C:/Users/gabio/Desktop/Gabe_linux/project/database_INPD/results_QC/INPD_QC_ibd --recode-vcf --keep-allele-order --out C:/Users/gabio/Desktop/Gabe_linux/project/database_INPD/results_QC/INPD_QC_paraimputar.vcf
-
-bcftools +fixref C:/Users/gabio/Desktop/Gabe_linux/project/database_INPD/results_QC/INPD_QC_paraimputar.vcf -- -f human_g1k_v37.fasta
-
-bcftools +fixref SCZ_paraimputar.vcf -Ov -o SCZ_paraimputar_strandflip.vcf -- -d -f human_g1k_v37.fasta -m flip
-
-vcf-sort SCZ_paraimputar_strandflip.vcf | bgzip -c > vcfSCZ_fimSanger.vcf.gz
+plink --bfile [arquivo_QC_ibd] --recode-vcf --real-ref-alleles --keep-allele-order --out [arquivo_QC_paraimputar.vcf]
+bcftools +fixref [arquivo_QC_paraimputar.vcf] -- -f human_g1k_v37.fasta
+bcftools +fixref [arquivo_QC_paraimputar.vcf] -Ov -o [arquivo_QC_paraimputar_strandflip.vcf] -- -d -f human_g1k_v37.fasta -m flip
+vcf-sort [arquivo_QC_paraimputar_strandflip.vcf] | bgzip -c > [arquivo_vcf_fimSanger.vcf.gz]
 
 
 #########################
 ##### POS IMPUTACAO #####
 #########################
 
-
+# Filtragem 1 - MAF
 vi filterCHR1-8
 i
 bcftools filter 1.vcf.gz -e'MAF<0.01' -Oz -o 1filter.vcf.gz
