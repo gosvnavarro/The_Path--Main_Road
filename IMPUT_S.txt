@@ -7,11 +7,15 @@
 #########################
 ##### PRE IMPUTACAO #####
 #########################
-plink --bfile [arquivo_QC_ibd] --recode-vcf --real-ref-alleles --keep-allele-order --out [arquivo_QC_paraimputar.vcf]
-bcftools +fixref [arquivo_QC_paraimputar.vcf] -- -f human_g1k_v37.fasta
-bcftools +fixref [arquivo_QC_paraimputar.vcf] -Ov -o [arquivo_QC_paraimputar_strandflip.vcf] -- -d -f human_g1k_v37.fasta -m flip
-vcf-sort [arquivo_QC_paraimputar_strandflip.vcf] | bgzip -c > [arquivo_vcf_fimSanger.vcf.gz]
+./plink2 --bfile 750_QC_ibd --make-pgen --out 750_imput
+./plink2 --pfile 750_imput --export vcf --out 750_imput_vcf
+bcftools +fixref 750_imput_vcf.vcf -- -f human_g1k_v37.fasta
+bcftools +fixref 750_imput_vcf.vcf -Ov -o 750_paraimputar_strandflip.vcf -- -d -f human_g1k_v37.fasta -m flip
+vcf-sort 750_paraimputar_strandflip.vcf | bgzip -c > 750vcf_fimSanger.vcf.gz
 
+# Fazer a conexão com o Globus (na linha de comando)
+# - entrar na pasta onde o arquivo do Globus foi baixado e rodar o seguinte comando para que a conexão seja estabelecida:
+/globusconnect &
 
 #########################
 ##### POS IMPUTACAO #####
