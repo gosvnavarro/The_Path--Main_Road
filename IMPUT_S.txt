@@ -9,7 +9,7 @@
 #########################
 ./plink2 --bfile 750_QC_ibd --make-pgen --out 750_imput
 ./plink2 --pfile 750_imput --export vcf --out 750_imput_vcf
-bcftools +fixref 750_imput_vcf.vcf -- -f human_g1k_v37.fasta
+bcftools +fixref 750_imput_vcf.vcf -- -f human_g1k_v37.fasta (# 'human_g1k_v37.fasta' genoma de referencia, 1000 Genomes)
 bcftools +fixref 750_imput_vcf.vcf -Ov -o 750_paraimputar_strandflip.vcf -- -d -f human_g1k_v37.fasta -m flip
 vcf-sort 750_paraimputar_strandflip.vcf | bgzip -c > 750vcf_fimSanger.vcf.gz
 
@@ -21,7 +21,7 @@ vcf-sort 750_paraimputar_strandflip.vcf | bgzip -c > 750vcf_fimSanger.vcf.gz
 ##### POS IMPUTACAO #####
 #########################
 
-# Filtragem 1 - MAF
+## Filtragem 1 - MAF (Frequencia Menor do Alelo; criar os filtros pelo nano do terminal)
 vi filterCHR1-8
 i
 bcftools filter 1.vcf.gz -e'MAF<0.01' -Oz -o 1filter.vcf.gz
