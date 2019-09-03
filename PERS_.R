@@ -1,12 +1,14 @@
-######################################
-###### CÁLCULO DO PERS (W0, W1) ######
-######################################
+#############################
+###### CÁLCULO DO PERS ######
+####### Script em R #########
+#############################
+
 
 # Carregar a tabela e os pacotes para o ambiente
 library(readr)
 library(dplyr)
 library(formattable)
-teste_varamb_W0 <- read_csv("~/Documents/Gabe/project/database_ambiental/teste_varamb_W0.csv")
+teste_varamb_W0 <- read_csv("[caminho_arquivo]")
 
 # Renomear as colunas !!CASO PRECISE!!
 names(teste_varamb_W0) <- c('ID', 'varamb_2', 'varamb_3', 'varamb_4', 'varamb_5', 'varamb_6', 'varamb_7')
@@ -115,15 +117,14 @@ for(i in varambs_W0_2500$varamb7_2_B) {
 # Checar o tipo de cada coluna
 sapply(varambs_W0_2500, mode)
 
-# Criar uma coluna com a soma de todas varambs, resultando assim no PERS (somar todos os valores e dividir por 6)
+# Criar uma coluna com a soma de todas varambs, resultando assim no PERS (somar todos os valores e dividir por 9)
 varambs_W0_2500$SOMA <- rowSums(cbind(varambs_W0_2500$varamb1_B, varambs_W0_2500$varamb2_2_B, varambs_W0_2500$varamb3_B, 
                                       varambs_W0_2500$varamb4_B, varambs_W0_2500$varamb5_B, varambs_W0_2500$varamb6_B, 
                                       varambs_W0_2500$varamb7_2_B, varambs_W0_2500$varamb8_B, varambs_W0_2500$varamb9_B))
 
 # Calcular o PERS
 varambs_W0_2500$PERS <- (varambs_W0_2500$SOMA) / 9
-varambs_W0_2500$PERS_P <- scales::percent(varambs_W0_2500$PERS)
 
 # Salvar a tabela
-write.table(varambs_W0_2500, file = '~/Documents/Gabe/dados_/_2500/_varambs/PERS_2500_W0_resultados.xlsx', sep = "\t", quote = FALSE, col.names = TRUE, row.names = FALSE)
+write.table(varambs_W0_2500, file = '[nome_do_arquivo_final]', sep = "\t", quote = FALSE, col.names = TRUE, row.names = FALSE)
 
