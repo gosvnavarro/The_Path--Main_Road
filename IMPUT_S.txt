@@ -7,11 +7,11 @@
 #########################
 ##### PRE IMPUTACAO #####
 #########################
-./plink2 --bfile 750_QC_ibd --make-pgen --out 750_imput
-./plink2 --pfile 750_imput --export vcf --out 750_imput_vcf
-bcftools +fixref 750_imput_vcf.vcf -- -f human_g1k_v37.fasta (# 'human_g1k_v37.fasta' genoma de referencia, 1000 Genomes)
-bcftools +fixref 750_imput_vcf.vcf -Ov -o 750_paraimputar_strandflip.vcf -- -d -f human_g1k_v37.fasta -m flip
-vcf-sort 750_paraimputar_strandflip.vcf | bgzip -c > 750vcf_fimSanger.vcf.gz
+./plink2 --bfile [arquivo_QC] --make-pgen --out [arquivo_QC]
+./plink2 --pfile [arquivo_QC] --export vcf --out [arquivo_QC_para_imputar.vcf]
+bcftools +fixref [arquivo_QC_para_imputar.vcf] -- -f human_g1k_v37.fasta (# 'human_g1k_v37.fasta' genoma de referencia, 1000 Genomes)
+bcftools +fixref [arquivo_QC_para_imputar.vcf] -Ov -o [arquivo_QC_para_imputar_strandflip.vcf] -- -d -f human_g1k_v37.fasta -m flip
+vcf-sort [arquivo_QC_para_imputar_strandflip.vcf] | bgzip -c > [arquivo_vcf_fimSanger.vcf.gz]
 
 # Fazer a conexão com o Globus (na linha de comando)
 # - entrar na pasta onde o arquivo do Globus foi baixado e rodar o seguinte comando para que a conexão seja estabelecida:
@@ -85,10 +85,10 @@ chmod 755 ./filterINFO9-22
 nohup ./filterINFO9-22 &
 
 # Juntar os arquivos filtrados
-bcftools concat -Oz 1filterinfo.vcf.gz 2filterinfo.vcf.gz 3filterinfo.vcf.gz 4filterinfo.vcf.gz 5filterinfo.vcf.gz 6filterinfo.vcf.gz 7filterinfo.vcf.gz 8filterinfo.vcf.gz 9filterinfo.vcf.gz 10filterinfo.vcf.gz 11filterinfo.vcf.gz 12filterinfo.vcf.gz 13filterinfo.vcf.gz 14filterinfo.vcf.gz 15filterinfo.vcf.gz 16filterinfo.vcf.gz 17filterinfo.vcf.gz 18filterinfo.vcf.gz 19filterinfo.vcf.gz 20filterinfo.vcf.gz 21filterinfo.vcf.gz 22filterinfo.vcf.gz -o imp_bruta.vcf.gz
+bcftools concat -Oz 1filterinfo.vcf.gz 2filterinfo.vcf.gz 3filterinfo.vcf.gz 4filterinfo.vcf.gz 5filterinfo.vcf.gz 6filterinfo.vcf.gz 7filterinfo.vcf.gz 8filterinfo.vcf.gz 9filterinfo.vcf.gz 10filterinfo.vcf.gz 11filterinfo.vcf.gz 12filterinfo.vcf.gz 13filterinfo.vcf.gz 14filterinfo.vcf.gz 15filterinfo.vcf.gz 16filterinfo.vcf.gz 17filterinfo.vcf.gz 18filterinfo.vcf.gz 19filterinfo.vcf.gz 20filterinfo.vcf.gz 21filterinfo.vcf.gz 22filterinfo.vcf.gz -o [arquivo_imputacao_bruta.vcf.gz]
 
 # Converter para plink2 format (pgen, pvar, psam)
-plink2 --vcf [arquivo_bruto.vcf.gz] --make-pgen --out [imputacao_bruta]
+plink2 --vcf [arquivo_imputacao_bruta.vcf.gz] --make-pgen --out [imputacao_bruta]
 
 # Remover SNPs duplicadas
 plink2 --pfile [imputacao_bruta] --rm-dup exclude-all list --make-pgen --out [imputacao_semduplicatas]
@@ -96,37 +96,22 @@ plink2 --pfile [imputacao_bruta] --rm-dup exclude-all list --make-pgen --out [im
 # Remover indels 
 plink2 --pfile [imputacao_semduplicatas] --snps-only just-acgt --make-pgen --out [imputacao_semindels]
 
-_-_-_-_-_-_-_-_-_-_-_-_-_
+# Fazer arquivo para atualizar o sexo dos individuos:
+awk '{print $2, $5}' [arquivo_QC.fam] > upd_sex.txt
+gedit upd_sex.txt #colocar cabeçalho: 'IID SEX', salvar
 
-#####TESTE!!!!!
-# Imputacao vem com muita coisa de baixa qualidade e o primeiro passo após imputacao tem que ser a retirada desses SNPs de baixa qualidade
-bcftools view -Ou -i 'INFO>0.7' -q 0.1:minor INPD_imput_bruto.vcf.gz #comando Marquinhos
-nohup bcftools view -Ou -i 'INFO>0.7' -q 0.1:minor INPD_imput_bruto.vcf.gz & #comando Marquinhos rodando em segundo plano
-bcftools query -i 'INFO>0.7' -q 0.1:minor INPD_imput_bruto.vcf.gz | head -2
-
-#Converter para .bed .bim .fam, excluindo variantes multialelicas
-plink --vcf INPD_imput_bruto.vcf.gz --biallelic-only -const-fid --id-delim ' ' --keep-allele-order --make-bed --out INPD_imput
-
-#Remover indels 
-plink --bfile INPD_imput --snps-only just-acgt --make-bed --out INPD_imput_semindels
-
-#Fazendo arquivo updatesex:
-awk '{print $1, $2, $5}' INPD_QC_ibd.fam > upd_sex_inpd.txt
-
-#Fazendo arquivo fenotipo
-awk '{print $1, $2, $6}' INPD_QC_ibd.fam > upd_pheno_inpd.txt
+# Fazer arquivo para atualizar o fenótipo dos individuos:
+awk '{print $2, $6}' [arquivo_QC.fam] > upd_pheno.txt
 
 #Atualizando fenotipo e sexo
-plink --bfile INPD_imput_semindels --update-sex upd_sex_inpd.txt --pheno upd_pheno_inpd.txt --make-bed --out INPD_imputado_sex_pheno
+plink2 --pfile [imputacao_semindels] --update-sex upd_sex.txt --pheno upd_pheno.txt --make-pgen --out [imputacao_sex_pheno]
 
 #QC
-plink --bfile INPD_imputado_sex_pheno --maf 0.01 --geno 0.05 --hwe 0.001 --make-bed --out INPD_IMPUT_QC_teste3
-
-_-_-_-_-_-_-_-_-_-_-_-_-_
+plink2 --pfile [imputacao_sex_pheno] --maf 0.01 --mind 0.01 --geno 0.05 --hwe 0.001 --make-pgen --out [arquivo_final_imputado_QC] 
 
 # PRS
 ## PRSice v2 - VERSAO USADA ATUALMENTE
-Rscript PRSice.R --dir . --prsice PRSice_linux --base ckqny_scz2snpres.txt --target [arquivo_imputado_qc] --thread 1 --stat OR --binary-target T --out [arquivo_saida] --score avg --cov [arquivo_pca.ei] --cov-col @PC[1-20] --bar-levels 0.001,0.01,0.05,0.1,0.2,0.3,0.4,0.5,0.8 --all-score T
+Rscript PRSice.R --dir . --prsice PRSice_linux --base ckqny_scz2snpres.txt --target [arquivo_final_imputado_QC] --thread 1 --stat OR --binary-target T --out [arquivo_saida] --score avg --cov [arquivo_pca.ei] --cov-col @PC[1-20] --bar-levels 0.001,0.01,0.05,0.1,0.2,0.3,0.4,0.5,0.8 --all-score T
 
 ## PRSice v1.25 - NÃO ESTÁ SENDO MAIS USADO
-R --file=PRSice_v1.25.R -q --args plink ./caminho_para/plink_1.9_linux_160914 base ./ckqny_scz2snpres.txt target [arquivo_imputado_qc] binary.target T debug.mode T covary T figname [arquivo_saida] barchart.levels  0.001,0.01,0.05,0.1,0.2,0.3,0.4,0.5,0.8 report.best.score.only F fastscore T covariates C1,C2,C3,C4,C5,C6,C7,C8,C9,C10 remove.mhc T plink.silent F
+R --file=PRSice_v1.25.R -q --args plink ./caminho_para/plink_1.9_linux_160914 base ./ckqny_scz2snpres.txt target [arquivo_final_imputado_QC] binary.target T debug.mode T covary T figname [arquivo_saida] barchart.levels  0.001,0.01,0.05,0.1,0.2,0.3,0.4,0.5,0.8 report.best.score.only F fastscore T covariates C1,C2,C3,C4,C5,C6,C7,C8,C9,C10 remove.mhc T plink.silent F
