@@ -1,4 +1,4 @@
-# MASTER
+# MASTER FILES
 Coletânea de scripts usados para as manipulações e análises dos dados genéticos de uma coorte referentes ao projeto de mestrado. Abaixo estão descritos os script e informações importantes a respeito do mesmo.
 
 - QC_.txt
