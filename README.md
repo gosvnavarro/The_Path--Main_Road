@@ -1,12 +1,10 @@
 # MASTER
 Coletânea de scripts usados para as manipulações e análises dos dados genéticos de uma coorte referentes ao projeto de mestrado. Abaixo estão descritos os script e informações importantes a respeito do mesmo.
 
-
 - QC_.txt
   * Script para o controle de qualidade (QC) de dados provenientes da genotipagem de amostras biológicas;
   * Baseado no QC realizado pelo Broad Institute;
   * Realizado pela linha de comando (terminal/prompt).
-  
   
 - IMPUT_S.txt
   * Script referente a pré e pós imputação dos dados resultantes do QC;
@@ -15,12 +13,10 @@ Coletânea de scripts usados para as manipulações e análises dos dados genét
   * É importante salientar que a imputação dos dados só deve ser feita se o chip usado para a genotipagem não for o mais indicado para a sua população;
   * Realizado pela linha de comando (terminal/prompt).
   
-  
  - PRS_.txt
     * PRS = Escore poligênico de risco;
     * Em desenvolvimento!!
     * Realizado pela linha de comando (terminal/prompt).
-
 
 - PERS_.R
   * PERS = Escore de fatores ambientais de risco;
