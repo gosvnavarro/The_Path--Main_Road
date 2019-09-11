@@ -13,9 +13,9 @@ Coletânea de scripts usados para as manipulações e análises dos dados genét
   * Realizado pela linha de comando (terminal/prompt).
   
  #### PRS_.txt
-    * PRS = Escore poligênico de risco;
-    * Em desenvolvimento!!
-    * Realizado pela linha de comando (terminal/prompt).
+  * PRS = Escore poligênico de risco;
+  * Em desenvolvimento!!
+  * Realizado pela linha de comando (terminal/prompt).
 
 #### PERS_.R
   * PERS = Escore de fatores ambientais de risco;
