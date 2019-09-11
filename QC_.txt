@@ -82,7 +82,7 @@ awk '{ print $1,$2 }' [arquivo_ibd_calculation.genome] > individuosrelacionados.
 ## OU 
 awk '{ print $3,$4 }' [arquivo_ibd_calculation.genome] > individuosrelacionados.txt
 
-## Excluir os individuos com compartilhamento genetico (OBS.: Arquivo final do QC: INPD_QC_idb)
+## Excluir os individuos com compartilhamento genetico (OBS.: Arquivo final do QC: arquivo_QC_ibd.(fam/bim/bed))
 plink --bfile [arquivo_QC_semhet] --remove individuosrelacionados.txt --make-bed --out [arquivo_QC_ibd]
 
 ## PASSO 7 - PCA (importante para o PRS)
