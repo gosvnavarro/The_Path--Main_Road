@@ -1,0 +1,6 @@
+Rscript PRSice.R --prsice ./PRSice_linux --base ./scz_gwas.txt --target ./Broad_INPD_QCed --out ./PRS_SCZ_gabe --binary-target T --thread 10 --all-score --fastscore T --bar-levels 0.0001,0.001,0.01,0.05,0.1,0.5,1.0
+
+# Comando que deu certo!!!
+# Resultados na pasta: '/home/genetica/Documents/Gabe/projeto/database_INPD/prs_'
+Rscript PRSice.R --prsice ./PRSice_linux --base ./scz_gwas.txt --target ./Broad_INPD_QCed --out ./PRS_SCZ_gabe --binary-target T --thread 10 --all-score --fastscore T --bar-levels 0.0001,0.001,0.01,0.05,0.1,0.5,1.0 --extract ./PRS_SCZ_gabe.valid --pheno fake_pheno
+
