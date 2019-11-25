@@ -1,12 +1,13 @@
-Rscript PRSice.R 
---prsice ./PRSice_linux \
---base ./[GWAS_REFERENCIA.txt] \
---target ./[ARQUIVO_QC.fam/bed/bim] \
---out ./[RESULTADOS_PRS] \
---binary-target T \
---thread 10 \
---all-score \
---fastscore T \
---bar-levels 0.0001,0.001,0.01,0.05,0.1,0.5,1.0 \
---extract ./[ARQUIVO_SNPS_VALIDOS.valid] \
---pheno [ARQUIVO_FENOTIPO.txt]
+Rscript PRSice.R --dir . \
+    --prsice PRSice_linux \
+    --base [ARQUIVO_BASE.txt] \
+    --target [ARQUIVO_QC] \
+    --thread 1 \
+    --stat OR \
+    --binary-target T \
+    --out [ARQUIVO_FINAL] \
+    --score avg \
+    --cov [ARQUIVO_PCA.eigenvec] \
+    --cov-col @PC[1-20] \
+    --bar-levels 0.001,0.01,0.05,0.1,0.2,0.3,0.4,0.5,0.8 \
+    --all-score T
