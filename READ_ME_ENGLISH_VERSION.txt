@@ -7,19 +7,19 @@ Below are described the scripts and important information about it.
   * Plink version 2;
   * Performed by the command line (terminal / prompt).
   
-#### sanger_imputation.txt
+## sanger_imputation.txt
   * Script regarding the pre and post imputation of data resulting from the QC;
   * This script is for data imputations made by Sanger;
   * Own QC;
   * It is important to point out that the imputation of data should only be done if the chip used for genotyping is not the most suitable for its population;
   * Performed by the command line (terminal / prompt).
   
- #### prs_score.txt
+## prs_score.txt
   * PRS = Polygenic risk score;
   * PRSice version 2
   * Performed by the command line (terminal / prompt).
 
-#### pers_score.R
+## pers_score.R
   * PERS = Score of environmental risk factors;
   * It is important that the data used for the calculation (input table) are in binary form (YES / NO) or with the respective odds ratios (if applicable);
   * Before uploading the file to R, it is recommended to save it in '.csv' format;
