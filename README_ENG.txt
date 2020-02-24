@@ -1,7 +1,7 @@
 Collection of scripts used for the manipulation and analysis of genetic data from a cohort related to the master's project. 
 Below are described the scripts and important information about it.
 
-#### qc.txt
+## qc.txt
   * Script for the quality control (QC) of data from the genotyping of biological samples;
   * Based on the QC conducted by the Broad Institute;
   * Plink version 2;
