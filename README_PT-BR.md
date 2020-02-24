@@ -23,3 +23,7 @@ Coletânea de scripts usados para as manipulações e análises dos dados genét
   * É importante que os dados utilizados para o cálculo (tabela de entrada) estejam de forma binária (SIM/NÃO) ou com os odds ratio respectivos (se for o caso);
   * Antes de subir o arquivo ao R, recomenda-se salvá-lo em formato '.csv';
   * A ordem aqui descrita das váriaveis ambientais segue a ordem desenvolvida no artigo de referência ('The "polyenviromic risk score": Aggregating environmental risk factors predicts conversion to psychosis in familial high-risk subjects', Padmanabhan, J.L., et al. 2016).
+  
+#### a_estatistica_da_coisa/a_estatistica_da_coisa_pt2.R
+  * Análises estatisticas (correlação, regressão, etc.) em R;
+  * Antes de subir o arquivo ao R, recomenda-se salvá-lo em formato '.csv';
