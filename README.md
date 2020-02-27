@@ -13,7 +13,7 @@ Coletânea de scripts usados para as manipulações e análises dos dados genét
   * É importante salientar que a imputação dos dados só deve ser feita se o chip usado para a genotipagem não for o mais indicado para a sua população;
   * Realizado pela linha de comando (terminal/prompt).
   
- #### prs_score.txt
+ #### prs_&_pcs.txt
   * PRS = Escore poligênico de risco;
   * PRSice versão 2
   * Realizado pela linha de comando (terminal/prompt).
