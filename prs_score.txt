@@ -1,9 +1,0 @@
-#######
-# PCA #
-#######
-plink --bfile [ARQUIVO_QC] --pca 10 --make-bed --out [ARQUIVO_FINAL_PCs]
-
-#######    
-# PRS #
-#######
-Rscript PRSice.R --prsice PRSice_linux --base [ARQUIVO_BASE.txt] --target [ARQUIVO_QC] --out [ARQUIVO_FINAL] --binary-target T --thread 10 --all-score --fastscore T --bar-levels 0.0001,0.001,0.01,0.05,0.1,0.5,1.0 --pheno fake_pheno --[ARQUIVO_PCA.eigenvec] --cov-col @PC[1-20]
