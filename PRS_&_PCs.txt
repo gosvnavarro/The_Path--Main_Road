@@ -1,8 +1,0 @@
-## PRS ##
-Rscript PRSice.R --prsice PRSice_linux --base X20544_3_gwas_imputed_v3_both_sexes_v2_NOVO.tsv --target 2188m --out PRS_PSYC_2188 --binary-target T --thread 10 --all-score --fastscore T --bar-levels 0.0001,0.001,0.01,0.05,0.1,0.5,1.0 --pheno fake_pheno
-
-## PCA ##
-./plink2 --bfile 2188m_completoW1 --pca 10 --make-bed --out pcs_2188m_completoW1_psyc
-
-## PRS COVARIADO PELOS PCs ##
-Rscript PRSice.R --dir . --prsice PRSice_linux --base X20544_3_gwas_imputed_v3_both_sexes_v2_NOVO.tsv --target 2188m_completoW1 --thread 10 --stat OR --binary-target T --out prs_psyc_10pcs_inpd_W1 --score avg --cov pcs_2188m_completoW1_psyc.eigenvec --cov-col @PC[1-10] --bar-levels 0.001,0.01,0.05,0.1,0.2,0.3,0.4,0.5,0.8 --all-score T --pheno fake_pheno
