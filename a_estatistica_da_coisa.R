@@ -1,6 +1,6 @@
 ## Estatistica básica e aplicada
 ## Author: Gabrielle Navarro
-## Updated in: 24/02/2020
+## Updated in: 28/02/2020
 
 ###########
 # PACOTES #
